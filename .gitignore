@@ -1,0 +1,29 @@
+### IDEs ###
+.idea/
+*.iml
+*.iws
+*.ipr
+.vscode/
+
+### Ferramentas locais (Claude Code / MCP) ###
+.claude/
+.mcp.json
+
+### Variaveis de ambiente e segredos ###
+.env
+.env.*
+*.pem
+*.key
+*.p12
+*.jks
+
+### Build ###
+target/
+build/
+
+### Dados locais do banco (docker volume) ###
+**/database/data/
+
+### SO ###
+.DS_Store
+Thumbs.db
