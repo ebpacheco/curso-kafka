@@ -21,6 +21,11 @@ public class ProdutoController {
         return ResponseEntity.ok(produto);
     }
 
+    @GetMapping
+    public List<Produto> listarProdutos(){
+        return service.listarProdutos();
+    }
+
     @GetMapping("{codigo}")
     public ResponseEntity<Produto> obterDados(@PathVariable("codigo")  Long codigo){
         return service

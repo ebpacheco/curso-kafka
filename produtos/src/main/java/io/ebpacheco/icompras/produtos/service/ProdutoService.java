@@ -5,6 +5,7 @@ import io.ebpacheco.icompras.produtos.repository.ProdutoRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -15,6 +16,10 @@ public class ProdutoService {
 
     public Produto salvar(Produto produto){
         return repository.save(produto);
+    }
+
+    public List<Produto> listarProdutos(){
+        return repository.findAll();
     }
 
     public Optional<Produto> obterPorCodigo(Long codigo){
