@@ -13,11 +13,11 @@ public class ClienteService {
 
     private final ClienteRepository repository;
 
-    public Cliente salvar(Cliente cliente){
+    public Cliente salvar(Cliente cliente) {
         return repository.save(cliente);
     }
 
-    public Optional<Cliente> obterPorCodigo(Long codigo){
+    public Optional<Cliente> obterPorCodigo(Long codigo) {
         return repository.findById(codigo);
     }
 }
