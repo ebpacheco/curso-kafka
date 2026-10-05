@@ -1,5 +1,6 @@
 package io.ebpacheco.ipedidos.pedidos.model;
 
+import io.ebpacheco.ipedidos.pedidos.controller.dto.DadosPagamentoDTO;
 import io.ebpacheco.ipedidos.pedidos.model.enums.StatusPedido;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -8,6 +9,8 @@ import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "pedido")
@@ -23,7 +26,7 @@ public class Pedido {
     @Column(name = "codigo_cliente", nullable = false)
     private Long codigoCliente;
 
-    @Column(name = "data_pedio",nullable = false)
+    @Column(name = "data_pedido",nullable = false)
     private LocalDateTime dataPedido;
 
     @Column(name = "total", precision = 16, scale = 2)
@@ -44,4 +47,10 @@ public class Pedido {
 
     @Column(name = "url_nf")
     private String urlNotaFiscal;
+
+    @Transient
+    private DadosPagamento dadosPagamento;
+
+    @OneToMany(mappedBy = "pedido")
+    private List<ItemPedido> itens;
 }
