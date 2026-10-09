@@ -10,5 +10,5 @@ import org.springframework.web.bind.annotation.PathVariable;
 public interface ClienteClients {
 
     @GetMapping("{codigo}")
-    ResponseEntity<ClienteRepresentation> obterDadosPorCodigo(@PathVariable("codigo") Long codigo);
+    ResponseEntity<ClienteRepresentation> obterDados(@PathVariable("codigo") Long codigo);
 }
