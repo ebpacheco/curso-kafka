@@ -7,6 +7,7 @@ import io.ebpacheco.ipedidos.pedidos.client.representation.ClienteRepresentation
 import io.ebpacheco.ipedidos.pedidos.client.representation.ProdutoRepresentation;
 import io.ebpacheco.ipedidos.pedidos.model.ItemPedido;
 import io.ebpacheco.ipedidos.pedidos.model.Pedido;
+import io.ebpacheco.ipedidos.pedidos.model.exception.ValidationException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -32,8 +33,11 @@ public class PedidoValidator {
             ClienteRepresentation cliente = response.getBody();
             log.info("Cliente de codigo {} encontrado: {}", cliente.codigo(), cliente.nome());
         } catch (FeignException.NotFound e) {
-            log.error("Cliente nao encontrado!");
+            var message = String.format("Cliente de codigo %d nao encontrado " ,codigoCliente);
+            throw new ValidationException("codigoCliente", message);
         }
+
+
 
     }
 
@@ -43,7 +47,8 @@ public class PedidoValidator {
             ProdutoRepresentation produto = response.getBody();
             log.info("Produto de codigo {} encontrado: {}", produto.codigo(), produto.nome());
         } catch (FeignException.NotFound e) {
-            log.error("Produto nao encontrado!");
+            var message = String.format("Produto de codigo %d nao encontrado " ,itemPedido.getCodigoProduto());
+            throw new ValidationException("codigoProduto", message);
         }
     }
 }

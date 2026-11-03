@@ -2,6 +2,8 @@ package io.ebpacheco.ipedidos.pedidos.controller;
 
 import io.ebpacheco.ipedidos.pedidos.controller.dto.NovoPedidoDTO;
 import io.ebpacheco.ipedidos.pedidos.controller.mappers.PedidoMapper;
+import io.ebpacheco.ipedidos.pedidos.model.ErroResposta;
+import io.ebpacheco.ipedidos.pedidos.model.exception.ValidationException;
 import io.ebpacheco.ipedidos.pedidos.repository.PedidoRepository;
 import io.ebpacheco.ipedidos.pedidos.service.PedidoService;
 import lombok.RequiredArgsConstructor;
@@ -21,9 +23,15 @@ public class PedidoController {
 
     @PostMapping
     public ResponseEntity<Object> criar(@RequestBody NovoPedidoDTO dto) {
-        var pedido = mapper.map(dto);
-        var novoPedido = service.criarPedido(pedido);
-        return ResponseEntity.ok(novoPedido.getCodigo());
+        try {
+            var pedido = mapper.map(dto);
+            var novoPedido = service.criarPedido(pedido);
+            return ResponseEntity.ok(novoPedido.getCodigo());
+        }catch (ValidationException e) {
+            var erro = new ErroResposta("Erro de validacao", e.getMessage(), e.getField());
+            return ResponseEntity.badRequest().body(erro);
+        }
+
     }
 
 }
