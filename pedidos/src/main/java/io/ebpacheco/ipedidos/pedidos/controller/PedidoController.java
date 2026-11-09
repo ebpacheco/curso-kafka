@@ -1,10 +1,11 @@
 package io.ebpacheco.ipedidos.pedidos.controller;
 
+import io.ebpacheco.ipedidos.pedidos.controller.dto.AdicaoNovoPagamentoDTO;
 import io.ebpacheco.ipedidos.pedidos.controller.dto.NovoPedidoDTO;
 import io.ebpacheco.ipedidos.pedidos.controller.mappers.PedidoMapper;
 import io.ebpacheco.ipedidos.pedidos.model.ErroResposta;
+import io.ebpacheco.ipedidos.pedidos.model.exception.ItemNaoEncontradoException;
 import io.ebpacheco.ipedidos.pedidos.model.exception.ValidationException;
-import io.ebpacheco.ipedidos.pedidos.repository.PedidoRepository;
 import io.ebpacheco.ipedidos.pedidos.service.PedidoService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -32,6 +33,17 @@ public class PedidoController {
             return ResponseEntity.badRequest().body(erro);
         }
 
+    }
+
+    @PostMapping("/pagamentos")
+    public ResponseEntity<Object> adicionarNovoPagamento(@RequestBody AdicaoNovoPagamentoDTO dto) {
+        try {
+            service.adicionarNovoPagamento(dto.codigoPedido(), dto.dados(), dto.tipoPagamento());
+            return ResponseEntity.noContent().build();
+        } catch (ItemNaoEncontradoException e) {
+            var erro = new ErroResposta("Item nao encontrad", "codigoPedido", e.getMessage());
+            return ResponseEntity.badRequest().body(erro);
+        }
     }
 
 }

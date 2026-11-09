@@ -1,8 +1,11 @@
 package io.ebpacheco.ipedidos.pedidos.service;
 
 import io.ebpacheco.ipedidos.pedidos.client.ServicoBancarioClient;
+import io.ebpacheco.ipedidos.pedidos.model.DadosPagamento;
 import io.ebpacheco.ipedidos.pedidos.model.Pedido;
 import io.ebpacheco.ipedidos.pedidos.model.enums.StatusPedido;
+import io.ebpacheco.ipedidos.pedidos.model.enums.TipoPagamento;
+import io.ebpacheco.ipedidos.pedidos.model.exception.ItemNaoEncontradoException;
 import io.ebpacheco.ipedidos.pedidos.repository.ItemPedidoRepository;
 import io.ebpacheco.ipedidos.pedidos.repository.PedidoRepository;
 import io.ebpacheco.ipedidos.pedidos.validator.PedidoValidator;
@@ -56,6 +59,29 @@ public class PedidoService {
             pedido.setStatus(StatusPedido.ERRO_PAGAMENTO);
             pedido.setObservacoes(observacoes);
         }
+        pedidoRepository.save(pedido);
+    }
+
+    @Transactional
+    public void adicionarNovoPagamento(Long codigoPedido, String dadosCartao, TipoPagamento tipo){
+        var pedidoEncontrado = pedidoRepository.findById(codigoPedido);
+
+        if(pedidoEncontrado.isEmpty()){
+            throw new ItemNaoEncontradoException("Pedido nao encontrado para o codigo informado");
+        }
+
+        var pedido = pedidoEncontrado.get();
+        DadosPagamento dadosPagamento = new DadosPagamento();
+        dadosPagamento.setTipoPagamento(tipo);
+        dadosPagamento.setDados(dadosCartao);
+
+        pedido.setDadosPagamento(dadosPagamento);
+        pedido.setStatus(StatusPedido.REALIZADO);
+        pedido.setObservacoes("Novo pagamento realizado, aguardando o novo processamento.");
+
+        String novaChavePagamento = servicoBancarioClient.solicitarPagamento(pedido);
+        pedido.setChavePagamento(novaChavePagamento);
+
         pedidoRepository.save(pedido);
     }
 }
