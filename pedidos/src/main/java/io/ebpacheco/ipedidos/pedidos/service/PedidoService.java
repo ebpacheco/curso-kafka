@@ -1,7 +1,12 @@
 package io.ebpacheco.ipedidos.pedidos.service;
 
+import io.ebpacheco.ipedidos.pedidos.client.ClienteClients;
+import io.ebpacheco.ipedidos.pedidos.client.ProdutosClient;
 import io.ebpacheco.ipedidos.pedidos.client.ServicoBancarioClient;
+import io.ebpacheco.ipedidos.pedidos.client.representation.ClienteRepresentation;
+import io.ebpacheco.ipedidos.pedidos.client.representation.ProdutoRepresentation;
 import io.ebpacheco.ipedidos.pedidos.model.DadosPagamento;
+import io.ebpacheco.ipedidos.pedidos.model.ItemPedido;
 import io.ebpacheco.ipedidos.pedidos.model.Pedido;
 import io.ebpacheco.ipedidos.pedidos.model.enums.StatusPedido;
 import io.ebpacheco.ipedidos.pedidos.model.enums.TipoPagamento;
@@ -11,8 +16,12 @@ import io.ebpacheco.ipedidos.pedidos.repository.PedidoRepository;
 import io.ebpacheco.ipedidos.pedidos.validator.PedidoValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -23,6 +32,8 @@ public class PedidoService {
     private final ItemPedidoRepository itemPedidoRepository;
     private final PedidoValidator pedidoValidator;
     private final ServicoBancarioClient servicoBancarioClient;
+    private final ClienteClients clienteClients;
+    private final ProdutosClient produtosClient;
 
     @Transactional
     public Pedido criarPedido(Pedido pedido) {
@@ -83,5 +94,30 @@ public class PedidoService {
         pedido.setChavePagamento(novaChavePagamento);
 
         pedidoRepository.save(pedido);
+    }
+
+    public Optional<Pedido> carregarDadosCompletoPedido(Long codigo){
+        Optional<Pedido> pedido = pedidoRepository.findById(codigo);
+        pedido.ifPresent(this::carregarDadosCliente);
+        pedido.ifPresent(this::carregarItensPedido);
+        return pedido;
+    }
+
+    private void carregarDadosCliente(Pedido pedido){
+        Long codigoCliente = pedido.getCodigoCliente();
+        var response = clienteClients.obterDados(codigoCliente);
+        pedido.setDadosCliente(response.getBody());
+    }
+
+    private void carregarItensPedido(Pedido pedido){
+       List<ItemPedido> itens =  itemPedidoRepository.findByPedido(pedido);
+       pedido.setItens(itens);
+       pedido.getItens().forEach(this::carregarDadosProduto);
+    }
+
+    private void carregarDadosProduto(ItemPedido itemPedido){
+        Long codigoProduto = itemPedido.getCodigoProduto();
+       var response = produtosClient.obterDados(codigoProduto);
+        itemPedido.setNome(response.getBody().nome());
     }
 }
