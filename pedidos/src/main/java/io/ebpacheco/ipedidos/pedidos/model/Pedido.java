@@ -1,5 +1,6 @@
 package io.ebpacheco.ipedidos.pedidos.model;
 
+import io.ebpacheco.ipedidos.pedidos.client.representation.ClienteRepresentation;
 import io.ebpacheco.ipedidos.pedidos.controller.dto.DadosPagamentoDTO;
 import io.ebpacheco.ipedidos.pedidos.model.enums.StatusPedido;
 import jakarta.persistence.*;
@@ -53,4 +54,7 @@ public class Pedido {
 
     @OneToMany(mappedBy = "pedido")
     private List<ItemPedido> itens;
+
+    @Transient
+    private ClienteRepresentation dadosCliente;
 }
