@@ -6,13 +6,12 @@ import io.ebpacheco.ipedidos.pedidos.controller.mappers.PedidoMapper;
 import io.ebpacheco.ipedidos.pedidos.model.ErroResposta;
 import io.ebpacheco.ipedidos.pedidos.model.exception.ItemNaoEncontradoException;
 import io.ebpacheco.ipedidos.pedidos.model.exception.ValidationException;
+import io.ebpacheco.ipedidos.pedidos.publisher.DetalhePedidoMapper;
+import io.ebpacheco.ipedidos.pedidos.publisher.representation.DetalhePedidoRepresentation;
 import io.ebpacheco.ipedidos.pedidos.service.PedidoService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("pedidos")
@@ -20,12 +19,13 @@ import org.springframework.web.bind.annotation.RestController;
 public class PedidoController {
 
     private final PedidoService service;
-    private final PedidoMapper mapper;
+    private final PedidoMapper pedidoMapper;
+    private final DetalhePedidoMapper detalhePedidoMapper;
 
     @PostMapping
     public ResponseEntity<Object> criar(@RequestBody NovoPedidoDTO dto) {
         try {
-            var pedido = mapper.map(dto);
+            var pedido = pedidoMapper.map(dto);
             var novoPedido = service.criarPedido(pedido);
             return ResponseEntity.ok(novoPedido.getCodigo());
         }catch (ValidationException e) {
@@ -44,6 +44,15 @@ public class PedidoController {
             var erro = new ErroResposta("Item nao encontrad", "codigoPedido", e.getMessage());
             return ResponseEntity.badRequest().body(erro);
         }
+    }
+
+    @GetMapping("{codigo}")
+    public ResponseEntity<DetalhePedidoRepresentation> obterDetalhesPedido(@PathVariable("codigo") Long codigo){
+        return service
+                .carregarDadosCompletoPedido(codigo)
+                .map(detalhePedidoMapper::map)
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
 }

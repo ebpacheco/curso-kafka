@@ -1,6 +1,8 @@
 package io.ebpacheco.ipedidos.pedidos.publisher;
 
+import io.ebpacheco.ipedidos.pedidos.model.ItemPedido;
 import io.ebpacheco.ipedidos.pedidos.model.Pedido;
+import io.ebpacheco.ipedidos.pedidos.publisher.representation.DetalheItemPedidoRepresentation;
 import io.ebpacheco.ipedidos.pedidos.publisher.representation.DetalhePedidoRepresentation;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -22,4 +24,6 @@ public interface DetalhePedidoMapper {
     @Mapping(source = "status", target = "status")
     @Mapping(source = "itens", target = "itens")
     DetalhePedidoRepresentation map(Pedido pedido);
+
+    DetalheItemPedidoRepresentation map(ItemPedido item);
 }
