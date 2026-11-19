@@ -3,20 +3,18 @@ package io.ebpacheco.ipedidos.pedidos.service;
 import io.ebpacheco.ipedidos.pedidos.client.ClienteClients;
 import io.ebpacheco.ipedidos.pedidos.client.ProdutosClient;
 import io.ebpacheco.ipedidos.pedidos.client.ServicoBancarioClient;
-import io.ebpacheco.ipedidos.pedidos.client.representation.ClienteRepresentation;
-import io.ebpacheco.ipedidos.pedidos.client.representation.ProdutoRepresentation;
 import io.ebpacheco.ipedidos.pedidos.model.DadosPagamento;
 import io.ebpacheco.ipedidos.pedidos.model.ItemPedido;
 import io.ebpacheco.ipedidos.pedidos.model.Pedido;
 import io.ebpacheco.ipedidos.pedidos.model.enums.StatusPedido;
 import io.ebpacheco.ipedidos.pedidos.model.enums.TipoPagamento;
 import io.ebpacheco.ipedidos.pedidos.model.exception.ItemNaoEncontradoException;
+import io.ebpacheco.ipedidos.pedidos.publisher.PagamentoPublisher;
 import io.ebpacheco.ipedidos.pedidos.repository.ItemPedidoRepository;
 import io.ebpacheco.ipedidos.pedidos.repository.PedidoRepository;
 import io.ebpacheco.ipedidos.pedidos.validator.PedidoValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,6 +32,7 @@ public class PedidoService {
     private final ServicoBancarioClient servicoBancarioClient;
     private final ClienteClients clienteClients;
     private final ProdutosClient produtosClient;
+    private final PagamentoPublisher pagamentoPublisher;
 
     @Transactional
     public Pedido criarPedido(Pedido pedido) {
@@ -65,12 +64,19 @@ public class PedidoService {
         Pedido pedido = pedidoEncontrado.get();
 
         if(sucesso){
-            pedido.setStatus(StatusPedido.PAGO);
+            prepararEPublicarPedidoPago(pedido);
         }else{
             pedido.setStatus(StatusPedido.ERRO_PAGAMENTO);
             pedido.setObservacoes(observacoes);
         }
         pedidoRepository.save(pedido);
+    }
+
+    private void prepararEPublicarPedidoPago(Pedido pedido) {
+        pedido.setStatus(StatusPedido.PAGO);
+        carregarDadosCliente(pedido);
+        carregarItensPedido(pedido);
+        pagamentoPublisher.publicar(pedido);
     }
 
     @Transactional
