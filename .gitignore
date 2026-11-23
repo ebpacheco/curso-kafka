@@ -24,6 +24,9 @@ build/
 ### Dados locais do banco (docker volume) ###
 **/database/data/
 
+### Dados locais do MinIO (bind mount ./docs) ###
+**/bucket/docs/
+
 ### SO ###
 .DS_Store
 Thumbs.db
